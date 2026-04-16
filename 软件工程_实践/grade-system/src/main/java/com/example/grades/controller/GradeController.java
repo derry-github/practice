@@ -14,32 +14,29 @@ public class GradeController {
     @Autowired
     private GradeService gradeService;
 
-    // 进入主页，带上所有学生数据
     @GetMapping("/")
     public String index(Model model) {
         model.addAttribute("students", gradeService.getAllStudents());
+        model.addAttribute("courses", gradeService.getAllCourses());
         return "index";
     }
 
-    // 提交添加学生的表单
+    // 学生管理
     @PostMapping("/addStudent")
     public String addStudent(@RequestParam String id, @RequestParam String name) {
         gradeService.addStudent(id, name);
         return "redirect:/";
     }
 
-    // 查特定学号的详情（成绩单）
-    @GetMapping("/student/{id}")
-    public String viewGrades(@PathVariable String id, Model model) {
-        gradeService.getStudentById(id).ifPresent(s -> model.addAttribute("student", s));
-        return "student_view";
+    @GetMapping("/deleteStudent/{id}")
+    public String deleteStudent(@PathVariable String id) {
+        gradeService.deleteStudent(id);
+        return "redirect:/";
     }
 
-    // 更新学生信息
     @PostMapping("/updateStudent")
     public String updateStudent(@RequestParam String id, @RequestParam String name, @RequestParam(required = false) String password, HttpSession session) {
         gradeService.updateStudent(id, name, password);
-        // 如果改的是当前登录人的信息，更新 session
         Student currentUser = (Student) session.getAttribute("user");
         if (currentUser != null && currentUser.getStudentId().equals(id)) {
             gradeService.getStudentById(id).ifPresent(s -> session.setAttribute("user", s));
@@ -47,10 +44,42 @@ public class GradeController {
         return "redirect:/student/" + id + "?success";
     }
 
-    // 给学生加成绩
+    @GetMapping("/student/{id}")
+    public String viewGrades(@PathVariable String id, Model model) {
+        gradeService.getStudentById(id).ifPresent(s -> model.addAttribute("student", s));
+        model.addAttribute("allCourses", gradeService.getAllCourses());
+        return "student_view";
+    }
+
+    // 课程管理
+    @PostMapping("/addCourse")
+    public String addCourse(@RequestParam String code, @RequestParam String name) {
+        gradeService.addCourse(code, name);
+        return "redirect:/";
+    }
+
+    @GetMapping("/deleteCourse/{code}")
+    public String deleteCourse(@PathVariable String code) {
+        gradeService.deleteCourse(code);
+        return "redirect:/";
+    }
+
+    // 成绩管理
     @PostMapping("/addGrade")
-    public String addGrade(@RequestParam String studentId, @RequestParam String courseName, @RequestParam Double score) {
-        gradeService.addGrade(studentId, courseName, score);
+    public String addGrade(@RequestParam String studentId, @RequestParam String courseCode, @RequestParam Double score) {
+        gradeService.addGrade(studentId, courseCode, score);
+        return "redirect:/student/" + studentId;
+    }
+
+    @GetMapping("/deleteGrade/{studentId}/{gradeId}")
+    public String deleteGrade(@PathVariable String studentId, @PathVariable Long gradeId) {
+        gradeService.deleteGrade(gradeId);
+        return "redirect:/student/" + studentId;
+    }
+
+    @PostMapping("/updateGrade")
+    public String updateGrade(@RequestParam String studentId, @RequestParam Long gradeId, @RequestParam Double score) {
+        gradeService.updateGrade(gradeId, score);
         return "redirect:/student/" + studentId;
     }
 }
