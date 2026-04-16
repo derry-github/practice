@@ -1,6 +1,8 @@
 package com.example.grades.controller;
 
+import com.example.grades.model.Student;
 import com.example.grades.service.GradeService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -31,6 +33,18 @@ public class GradeController {
     public String viewGrades(@PathVariable String id, Model model) {
         gradeService.getStudentById(id).ifPresent(s -> model.addAttribute("student", s));
         return "student_view";
+    }
+
+    // 更新学生信息
+    @PostMapping("/updateStudent")
+    public String updateStudent(@RequestParam String id, @RequestParam String name, @RequestParam(required = false) String password, HttpSession session) {
+        gradeService.updateStudent(id, name, password);
+        // 如果改的是当前登录人的信息，更新 session
+        Student currentUser = (Student) session.getAttribute("user");
+        if (currentUser != null && currentUser.getStudentId().equals(id)) {
+            gradeService.getStudentById(id).ifPresent(s -> session.setAttribute("user", s));
+        }
+        return "redirect:/student/" + id + "?success";
     }
 
     // 给学生加成绩

@@ -4,6 +4,7 @@ import com.example.grades.model.Grade;
 import com.example.grades.model.Student;
 import com.example.grades.repository.GradeRepository;
 import com.example.grades.repository.StudentRepository;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +21,25 @@ public class GradeServiceImpl implements GradeService {
     @Autowired
     private GradeRepository gradeRepo;
 
+    @PostConstruct
+    public void init() {
+        // 初始化管理员账号
+        if (studentRepo.findById("admin").isEmpty()) {
+            Student admin = new Student();
+            admin.setStudentId("admin");
+            admin.setName("系统管理员");
+            admin.setPassword("admin");
+            admin.setRole("ADMIN");
+            studentRepo.save(admin);
+        }
+    }
+
+    @Override
+    public Optional<Student> login(String id, String password) {
+        return studentRepo.findById(id)
+                .filter(s -> s.getPassword().equals(password));
+    }
+
     @Override
     @Transactional(readOnly = true)
     public List<Student> getAllStudents() {
@@ -32,6 +52,8 @@ public class GradeServiceImpl implements GradeService {
         Student s = new Student();
         s.setStudentId(id);
         s.setName(name);
+        s.setPassword("123456"); // 默认密码
+        s.setRole("STUDENT");
         studentRepo.save(s);
     }
 
@@ -41,7 +63,18 @@ public class GradeServiceImpl implements GradeService {
         return studentRepo.findById(id);
     }
 
-    // 加个事务，保证查学生和存成绩要么全成功，要么全失败
+    @Override
+    @Transactional
+    public void updateStudent(String id, String name, String password) {
+        studentRepo.findById(id).ifPresent(s -> {
+            s.setName(name);
+            if (password != null && !password.isEmpty()) {
+                s.setPassword(password);
+            }
+            studentRepo.save(s);
+        });
+    }
+
     @Override
     @Transactional
     public void addGrade(String studentId, String courseName, Double score) {

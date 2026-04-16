@@ -6,6 +6,9 @@ import java.util.Optional;
 
 // 成绩管理的业务逻辑接口
 public interface GradeService {
+    // 登录验证
+    Optional<Student> login(String id, String password);
+
     // 拿所有的学生列表
     List<Student> getAllStudents();
 
@@ -17,4 +20,7 @@ public interface GradeService {
 
     // 给学生加一门课的成绩
     void addGrade(String studentId, String courseName, Double score);
+
+    // 更新学生信息
+    void updateStudent(String id, String name, String password);
 }
