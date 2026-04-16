@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生成绩管理系统 - 首页</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .navbar { margin-bottom: 2rem; }
+        .card { box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); }
+        /* 刚开始都先藏起来，等 JS 判断该显摆哪部分 */
+        .admin-only, .student-only { display: none; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="/">成绩管理系统</a>
+        <!-- 这里切换管理员和学生身份 -->
+        <div class="ms-auto d-flex align-items-center">
+            <span class="text-white me-2 small">访问入口：</span>
+            <div class="btn-group btn-group-sm" role="group">
+                <input type="radio" class="btn-check" name="roleToggle" id="studentMode" onclick="switchMode('student')">
+                <label class="btn btn-outline-light" for="studentMode">学生查询</label>
+
+                <input type="radio" class="btn-check" name="roleToggle" id="adminMode" onclick="switchMode('admin')">
+                <label class="btn btn-outline-light" for="adminMode">管理员后台</label>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <!-- 查成绩的输入框 -->
+    <div class="row mb-4" id="studentSearchSection">
+        <div class="col-12">
+            <div class="card border-info">
+                <div class="card-body d-flex align-items-center justify-content-between">
+                    <div>
+                        <h5 class="card-title text-info mb-1">成绩快速查询</h5>
+                        <p class="card-text text-muted small mb-0">输入学号点查询就行</p>
+                    </div>
+                    <div class="d-flex gap-2 w-50">
+                        <input type="text" id="queryStudentId" class="form-control" placeholder="在这儿输学号...">
+                        <button onclick="queryGrade()" class="btn btn-info text-white px-4">查询</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- 管理员才看的见：加学生 -->
+        <div class="col-md-4 mb-4 admin-only" id="adminAddSection">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">添加新学生</h5>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/addStudent}" method="post">
+                        <div class="mb-3">
+                            <label for="studentId" class="form-label">学号</label>
+                            <input type="text" class="form-control" id="studentId" name="id" placeholder="2023001" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="studentName" class="form-label">姓名</label>
+                            <input type="text" class="form-control" id="studentName" name="name" placeholder="名字" required>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">添加学生</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- 学生花名册 -->
+        <div class="col-12" id="listContainer">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="card-title mb-0">学生列表</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">学号</th>
+                                    <th>姓名</th>
+                                    <th class="text-end pe-4 admin-only">管理操作</th>
+                                    <th class="text-end pe-4 student-only">个人成绩单</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="s : ${students}">
+                                    <td class="ps-4 font-monospace" th:text="${s.studentId}"></td>
+                                    <td th:text="${s.name}"></td>
+                                    <td class="text-end pe-4 admin-only">
+                                        <a th:href="@{'/student/' + ${s.studentId}}" class="btn btn-sm btn-outline-primary">录入成绩</a>
+                                    </td>
+                                    <td class="text-end pe-4 student-only">
+                                        <a th:href="@{'/student/' + ${s.studentId}}" class="btn btn-sm btn-info text-white">看成绩</a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function switchMode(mode, bypassCheck = false) {
+        if (mode === 'admin' && !bypassCheck) {
+            // 如果没登录过，就弹窗问密码
+            const isAuthenticated = sessionStorage.getItem('isAdminAuthenticated');
+            if (isAuthenticated !== 'true') {
+                const password = prompt('请输入管理员密码：');
+                if (password === 'admin') {
+                    sessionStorage.setItem('isAdminAuthenticated', 'true');
+                } else {
+                    alert('密码不对！');
+                    document.getElementById('studentMode').checked = true;
+                    return switchMode('student', true);
+                }
+            }
+        }
+
+        // 把当前选的模式存session里，省得刷一下页面就跳回学生了
+        sessionStorage.setItem('activeMode', mode);
+        
+        const adminElements = document.querySelectorAll('.admin-only');
+        const studentElements = document.querySelectorAll('.student-only');
+        const adminAddSection = document.getElementById('adminAddSection');
+        const listContainer = document.getElementById('listContainer');
+
+        if (mode === 'admin') {
+            document.getElementById('adminMode').checked = true;
+            adminElements.forEach(el => {
+                if(el.tagName === 'TH' || el.tagName === 'TD') el.style.display = 'table-cell';
+                else el.style.display = 'block';
+            });
+            studentElements.forEach(el => el.style.display = 'none');
+            adminAddSection.style.display = 'block';
+            listContainer.classList.remove('col-12');
+            listContainer.classList.add('col-md-8');
+        } else {
+            document.getElementById('studentMode').checked = true;
+            adminElements.forEach(el => el.style.display = 'none');
+            studentElements.forEach(el => {
+                if(el.tagName === 'TH' || el.tagName === 'TD') el.style.display = 'table-cell';
+                else el.style.display = 'block';
+            });
+            adminAddSection.style.display = 'none';
+            listContainer.classList.remove('col-md-8');
+            listContainer.classList.add('col-12');
+        }
+    }
+
+    function queryGrade() {
+        const id = document.getElementById('queryStudentId').value.trim();
+        if (id) {
+            window.location.href = '/student/' + id;
+        } else {
+            alert('先输学号啊');
+        }
+    }
+
+    // 页面一加载，看看之前选的是啥模式，没选过就默认学生
+    document.addEventListener('DOMContentLoaded', function() {
+        const savedMode = sessionStorage.getItem('activeMode') || 'student';
+        switchMode(savedMode);
+    });
+</script>
+</body>
+</html>
