@@ -1,4 +1,4 @@
-package com.example.grades.model;
+package com.grades.model;
 
 import jakarta.persistence.*;
 import lombok.Data;

@@ -1,5 +1,5 @@
-package com.example.grades.repository;
-import com.example.grades.model.Student;
+package com.grades.repository;
+import com.grades.model.Student;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 @Repository

@@ -1,6 +1,6 @@
-package com.example.grades.config;
+package com.grades.config;
 
-import com.example.grades.model.Student;
+import com.grades.model.Student;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;

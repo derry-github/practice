@@ -1,4 +1,4 @@
-package com.example.grades.config;
+package com.grades.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;

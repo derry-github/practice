@@ -1,7 +1,7 @@
-package com.example.grades.service;
+package com.grades.service;
 
-import com.example.grades.model.Course;
-import com.example.grades.model.Student;
+import com.grades.model.Course;
+import com.grades.model.Student;
 import java.util.List;
 import java.util.Optional;
 

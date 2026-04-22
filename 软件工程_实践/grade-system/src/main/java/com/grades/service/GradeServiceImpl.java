@@ -1,11 +1,11 @@
-package com.example.grades.service;
+package com.grades.service;
 
-import com.example.grades.model.Course;
-import com.example.grades.model.Grade;
-import com.example.grades.model.Student;
-import com.example.grades.repository.CourseRepository;
-import com.example.grades.repository.GradeRepository;
-import com.example.grades.repository.StudentRepository;
+import com.grades.model.Course;
+import com.grades.model.Grade;
+import com.grades.model.Student;
+import com.grades.repository.CourseRepository;
+import com.grades.repository.GradeRepository;
+import com.grades.repository.StudentRepository;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

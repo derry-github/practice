@@ -1,7 +1,7 @@
-package com.example.grades.controller;
+package com.grades.controller;
 
-import com.example.grades.model.Student;
-import com.example.grades.service.GradeService;
+import com.grades.model.Student;
+import com.grades.service.GradeService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
