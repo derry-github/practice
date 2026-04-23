@@ -8,7 +8,7 @@ public:
     int blocks[5];      // 物理块
     int capacity;        // 物理块总数
     int size = 0;        // 当前已占用块数
-    int nextReplace = 0; // 下一个要替换的位置 (FIFO 核心)
+    int nextReplace = 0; // 下一个要替换的位置
     int faultCount = 0;  // 缺页次数
 
     PageManager(int cap) : capacity(cap) {
